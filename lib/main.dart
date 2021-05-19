@@ -17,7 +17,7 @@ class Base extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       onGenerateRoute: CustomRouter.generateRoute,
-      initialRoute: '/share',
+      initialRoute: '/favorite',
       theme: CustomTheme.lightTheme,
       debugShowCheckedModeBanner: false,
     );

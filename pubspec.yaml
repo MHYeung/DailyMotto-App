@@ -28,6 +28,8 @@ dependencies:
   flutter_local_notifications: ^5.0.0+4
   shared_preferences: ^2.0.5
   google_mobile_ads: ^0.12.2+1
+  share: ^2.0.1
+  flutter_slidable:
 
 
 

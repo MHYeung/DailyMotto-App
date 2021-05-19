@@ -32,8 +32,8 @@ class FavoritePage extends StatelessWidget {
             centerTitle: true,
           ),
           body: Container(
-            padding: EdgeInsets.all(10.0),
-            height: MediaQuery.of(context).size.height - 80,
+            padding: EdgeInsets.only(top: 2.0, bottom: 0, left: 5, right: 5),
+            height: MediaQuery.of(context).size.height - 50,
             width: double.infinity,
             child: SavedQuotes(),
           )),
@@ -48,33 +48,6 @@ class SavedQuotes extends StatefulWidget {
 
 class _SavedQuotesState extends State<SavedQuotes> {
   PreferencesService _preference = PreferencesService();
-
-  SlidableController slidableController;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    slidableController = SlidableController(
-      onSlideAnimationChanged: handleSlideAnimationChanged,
-      onSlideIsOpenChanged: handleSlideIsOpenChanged,
-    );
-  }
-
-  Animation<double> _rotationAnimation;
-  Color _fabColor = Colors.blue;
-
-  void handleSlideAnimationChanged(Animation<double> slideAnimation) {
-    setState(() {
-      _rotationAnimation = slideAnimation;
-    });
-  }
-
-  void handleSlideIsOpenChanged(bool isOpen) {
-    setState(() {
-      _fabColor = isOpen ? Colors.green : Colors.blue;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,94 +93,105 @@ class _SavedQuotesState extends State<SavedQuotes> {
                     itemBuilder: (BuildContext context, int index) {
                       return snapshot.data == null
                           ? Text('Nothing saved')
-                          : Slidable(
-                              key: Key(index.toString()),
-                              controller: slidableController,
-                              direction: Axis.horizontal,
-                              actionPane: SlidableDrawerActionPane(),
-                              actions: [IconButton(
+                          : Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+                            color: CustomTheme.lightTheme.primaryColor,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    contentPadding: EdgeInsets.all(4.0),
+                                    leading: CircleAvatar(
+                                      backgroundColor: null,
+                                      child: Text('${index + 1}'),
+                                      radius: 15,
+                                    ),
+                                    title:
+                                        Text(snapshot.data.savedquotes[index], style: TextStyle(fontSize: 24),),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(primary: CustomTheme.lightTheme.buttonColor),
+                                        label: Text('分享金句'),
                                           icon: Icon(Icons.share),
                                           onPressed: () {
                                             setState(() {
                                               Share.share(snapshot
                                                   .data.savedquotes[index]);
                                             });
-                                          }),],            
-                              child: ListTile(
-                                  tileColor: Colors.green[100],
-                                  contentPadding: EdgeInsets.all(4.0),
-                                  leading: CircleAvatar(
-                                    child: Text('${index + 1}'),
-                                    radius: 30,
-                                  ),
-                                  title: Text(snapshot.data.savedquotes[index]),
-                                  trailing: Column(
-                                    children: [
-                                      IconButton(
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () {
-                                            showDialog<void>(
-                                              context: context,
-                                              barrierDismissible:
-                                                  false, // user must tap button!
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  titlePadding:
-                                                      EdgeInsets.symmetric(
-                                                          horizontal: 15.0,
-                                                          vertical: 24.0),
-                                                  title: Text(
-                                                    '確定要移除金句?',
-                                                    style:
-                                                        TextStyle(fontSize: 40),
-                                                  ),
-                                                  actionsPadding:
-                                                      EdgeInsets.symmetric(
-                                                          horizontal: 20),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      child: Text(
-                                                        '確定',
-                                                        style: TextStyle(
-                                                            fontSize: 30,
-                                                            color: Colors.red),
-                                                      ),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          snapshot
-                                                              .data.savedquotes
-                                                              .removeAt(index);
-                                                          snapshot.data.quotesid
-                                                              .removeAt(index);
-                                                          _preference
-                                                              .saveQuotes(
-                                                                  snapshot
-                                                                      .data);
-                                                        });
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                    TextButton(
-                                                      child: Text(
-                                                        '取消',
-                                                        style: TextStyle(
-                                                            fontSize: 30,
-                                                            color: Colors.blue),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
                                           }),
-                                      
+                                          SizedBox(width:15.0),
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(primary: Colors.red.withOpacity(0.5)),
+                                        label: Text('刪除'),
+                                        icon: Icon(Icons.delete),
+                                        onPressed: () {
+                                          showDialog<void>(
+                                            context: context,
+                                            barrierDismissible:
+                                                false, // user must tap button!
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                titlePadding:
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 15.0,
+                                                        vertical: 24.0),
+                                                title: Text(
+                                                  '確定要移除金句?',
+                                                  style:
+                                                      TextStyle(fontSize: 40),
+                                                ),
+                                                actionsPadding:
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 20),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    child: Text(
+                                                      '確定',
+                                                      style: TextStyle(
+                                                          fontSize: 30,
+                                                          color: Colors.red),
+                                                    ),
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        snapshot
+                                                            .data.savedquotes
+                                                            .removeAt(index);
+                                                        snapshot.data.quotesid
+                                                            .removeAt(index);
+                                                        _preference.saveQuotes(
+                                                            snapshot.data);
+                                                      });
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    child: Text(
+                                                      '取消',
+                                                      style: TextStyle(
+                                                          fontSize: 30,
+                                                          color: Colors.blue),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      )
                                     ],
-                                  )));
+                                  )
+                                ],
+                              ),
+                            );
                     });
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");

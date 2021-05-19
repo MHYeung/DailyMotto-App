@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "260342838458",
+    "project_id": "motto-ef4a9",
+    "storage_bucket": "motto-ef4a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260342838458:android:4f3a750baa4ef5be78fe83",
+        "android_client_info": {
+          "package_name": "com.nngnstudio.motto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "260342838458-a2h9cuud48rj7riearv82btukrf6anih.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAasAHAKJfdEi2gU40HoAgSPuSLLol8V3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "260342838458-a2h9cuud48rj7riearv82btukrf6anih.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

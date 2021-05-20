@@ -1,15 +1,21 @@
 import './home_page.dart';
 import './Model/notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import './overall_theme.dart';
 import './routes.dart';
+import 'Model/quote_provider.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
-  runApp(Base());
+  runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Counter()),
+      ],
+      child: Base()));
 }
 
 class Base extends StatelessWidget {
@@ -17,7 +23,7 @@ class Base extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       onGenerateRoute: CustomRouter.generateRoute,
-      initialRoute: '/favorite',
+      initialRoute: '/nhome',
       theme: CustomTheme.lightTheme,
       debugShowCheckedModeBanner: false,
     );

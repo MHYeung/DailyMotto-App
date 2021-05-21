@@ -1,10 +1,12 @@
+import 'package:motto/base_page.dart';
+
 import './favorite_page.dart';
 import './overall_theme.dart';
-import './share_page.dart';
 import 'package:flutter/material.dart';
 
+import 'home_page.dart';
 import 'main.dart';
-import 'newHomePage.dart';
+
 
 class CustomRouter{
   static Route<dynamic> generateRoute (RouteSettings settings){
@@ -13,10 +15,8 @@ class CustomRouter{
         return MaterialPageRoute(builder:(_) => Home());
       case '/favorite':
         return MaterialPageRoute(builder: (_) => FavoritePage());
-      case '/share':
-        return MaterialPageRoute(builder: (_) => SharePage());
-      case '/nhome':
-        return MaterialPageRoute(builder: (_) => NewHomePage());
+      case '/base':
+        return MaterialPageRoute(builder: (_) => BasePage());
       default:
         return MaterialPageRoute(builder:(_) => ErrorPage());
     }

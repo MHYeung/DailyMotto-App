@@ -1,18 +1,47 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:motto/Model/AdManager.dart';
+import 'package:share/share.dart';
 
 import './Model/preference_service.dart';
-import './Model/quote_model.dart';
-import './Model/saved_items.dart';
+
 import './Model/notification_service.dart';
 import './overall_theme.dart';
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart' as http;
-import 'package:lpinyin/lpinyin.dart';
+import 'Model/bannerAd.dart';
+import 'Model/quote_provider.dart';
+import 'package:provider/provider.dart';
+
+String quote = '';
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: CustomTheme.lightTheme.bottomAppBarColor,
+        title: Text('人生格言'),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.popAndPushNamed(context, '/base');
+                }),
+        actions: [
+          IconButton(icon: Icon(Icons.favorite), onPressed: (){
+            Navigator.pushNamed(context, '/favorite');
+          })
+        ],
+      ),
+      body: Body(),
+    );
+  }
+}
 
 class Body extends StatefulWidget {
   @override
@@ -20,94 +49,68 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  Future<Welcome> futureWelcome;
-  SavedItems _items;
   PreferencesService _preference = PreferencesService();
-  Welcome _welcome;
-  bool _isAdLoaded = false;
-  BannerAd _ad;
+  List<String> _quoteList;
+  InterstitialAd _interstitialAd;
+  int _pressCount = 0;
 
-  //admob
+  Future<List<String>> _getQuotes() async {
+    _preference.getQuotes().then((value) => _quoteList = value);
+    String raw = await rootBundle.loadString('assets/content.txt');
+    List<String> quotes = raw.split('"');
+    NotificationService().scheduledNotification();
+    return quotes;
+  }
 
   @override
   void dispose() {
-    // COMPLETE: Dispose a BannerAd object
-    _ad.dispose();
+    // TODO: implement dispose
     super.dispose();
+    _interstitialAd.dispose();
   }
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    futureWelcome = _getData();
-    _preference.getQuotes().then((value) => _items = value);
-    _ad = BannerAd(
-        adUnitId: AdManager.bannerAdUnitID,
-        size: AdSize.banner,
-        request: AdRequest(),
-        listener: AdListener(onAdLoaded: (_) {
-          setState(() {
-            _isAdLoaded = true;
-          });
-        }, onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          print(
-              'Ad load failed (code=${error.code} message = ${error.message}');
-        }));
-
-    _ad.load();
-  }
-
-  Future<Welcome> _getData() async {
-    final response = await http.get(Uri.parse('https://api.xygeng.cn/one'));
-
-    if (response.statusCode == 200) {
-      var result = Utf8Decoder().convert(response.bodyBytes);
-      final welcome = welcomeFromJson(result);
-      print(welcome.data.id);
-      NotificationService().scheduledNotification(
-          ChineseHelper.convertToTraditionalChinese(welcome.data.content));
-      _welcome = welcome;
-      return welcome;
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('未能載入句子');
-    }
+    _interstitialAd = InterstitialAd(
+        adUnitId: AdManager.interstitialAdUnitID,
+        listener: AdListener(),
+        request: AdRequest());
+    _interstitialAd.load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height-80,
+      height: MediaQuery.of(context).size.height - 80,
       decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [Colors.white60, Colors.yellow, Colors.pink[200]])),
-      padding: const EdgeInsets.only(bottom: 10.0, top:5.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+          gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Colors.white60, Colors.yellow, Colors.pink[200]])),
+      padding: const EdgeInsets.only(bottom: 10.0, top: 5.0),
+      child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
         Container(
           height: MediaQuery.of(context).size.height * 0.6,
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 15),
           child: Center(
-            child: FutureBuilder<Welcome>(
-              future: futureWelcome,
+            child: FutureBuilder(
+              future: _getQuotes(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return SingleChildScrollView(
-                    child: Text(
-                      ChineseHelper.convertToTraditionalChinese(
-                          snapshot.data.data.content),
-                      style: TextStyle(
-                        fontSize: 30,
-                      ),
-                    ),
-                  );
+                  quote = snapshot.data[context.watch<Counter>().count];
+                  return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: Center(
+                          child: Text(
+                        snapshot.data[context.watch<Counter>().count],
+                        maxLines: 8,
+                        style: TextStyle(fontSize: 30),
+                      )));
                 } else if (snapshot.hasError) {
                   return Text("${snapshot.error}");
                 }
@@ -120,62 +123,83 @@ class _BodyState extends State<Body> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    futureWelcome = _getData();
-                    print('Button Pressed');
-                  });
+            CustomButton(
+                func: () {
+                  context.read<Counter>().decrement();
+                  _pressCount++;
+                  if (_pressCount % 7 == 0) {
+                    _interstitialAd.show();
+                    _interstitialAd.dispose();
+                    _interstitialAd.load();
+                  }
                 },
-                style: ElevatedButton.styleFrom(
-                  primary: CustomTheme.lightTheme.buttonColor,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                  padding: EdgeInsets.all(5.0),
-                  elevation: 2.0,
-                ),
-                child: Text(
-                  '下一句',
-                  style: TextStyle(fontSize: 30),
-                )),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: CustomTheme.lightTheme.buttonColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                padding: EdgeInsets.all(5.0),
-                elevation: 2.0,
-              ),
-              child: Text(
-                '儲存句子',
-                style: TextStyle(fontSize: 30),
-              ),
-              onPressed: () {
-                if (_items.quotesid.contains(_welcome.data.id) == true) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('你已儲存過這句金句。'),
-                    elevation: 10,
-                    action: SnackBarAction(
-                      label: '查看已儲存的金句',
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/favorite');
-                      },
-                    ),
-                  ));
-                } else {
-                  _items.savedquotes.add(
-                      ChineseHelper.convertToTraditionalChinese(
-                          _welcome.data.content));
-                  _items.quotesid.add(_welcome.data.id);
-                }
-                _preference.saveQuotes(_items);
-                print(_items.savedquotes);
-              },
-            ),
+                title: '上一句'),
+            CustomButton(func: () => Share.share(quote), title: '分享'),
+            CustomButton(
+                func: () {
+                  if (_quoteList.contains(quote) == true) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('你已儲存過這句金句。'),
+                      elevation: 10,
+                      action: SnackBarAction(
+                        label: '查看已儲存的金句',
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/favorite');
+                        },
+                      ),
+                    ));
+                  } else {
+                    _quoteList.add(quote);
+                  }
+                  _preference.saveQuotes(_quoteList);
+                  print(_quoteList);
+                },
+                title: '儲存句子'),
+            CustomButton(
+                func: () {
+                  context.read<Counter>().increment();
+                  _pressCount++;
+                  if (_pressCount % 7 == 0) {
+                    _interstitialAd.show();
+                    _interstitialAd.dispose();
+                    _interstitialAd.load();
+                  }
+                },
+                title: '下一句'),
           ],
         ),
-        _isAdLoaded ? Container(child: AdWidget(ad: _ad,), width: _ad.size.width.toDouble(), height: 72.0, alignment: Alignment.center) : Container(height: 72.0,),
+        HomePageAd()
       ]),
     );
   }
 }
+
+class CustomButton extends StatelessWidget {
+  const CustomButton({
+    Key key,
+    @required this.func,
+    @required this.title,
+  }) : super(key: key);
+
+  final Function func;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: CustomTheme.lightTheme.buttonColor,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0))),
+        padding: EdgeInsets.all(5.0),
+        elevation: 2.0,
+      ),
+      onPressed: func,
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 24),
+      ),
+    );
+  }
+}
+

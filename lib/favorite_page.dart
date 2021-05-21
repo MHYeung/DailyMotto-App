@@ -1,8 +1,6 @@
 import 'package:share/share.dart';
 
-
 import './Model/preference_service.dart';
-import './Model/saved_items.dart';
 import './overall_theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +18,7 @@ class FavoritePage extends StatelessWidget {
             leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.popAndPushNamed(context, '/home');
+                  Navigator.popAndPushNamed(context, '/base');
                 }),
             backgroundColor: CustomTheme.lightTheme.bottomAppBarColor,
             title: Text('已儲存的金句',
@@ -51,11 +49,11 @@ class _SavedQuotesState extends State<SavedQuotes> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<SavedItems>(
+    return FutureBuilder(
         future: _preference.getQuotes(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return (snapshot.data.savedquotes.length == 0)
+            return (snapshot.data.length == 0)
                 ? Center(
                     child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -89,13 +87,14 @@ class _SavedQuotesState extends State<SavedQuotes> {
                 : ListView.builder(
                     scrollDirection: Axis.vertical,
                     reverse: false,
-                    itemCount: snapshot.data.savedquotes.length,
+                    itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
                       return snapshot.data == null
                           ? Text('Nothing saved')
                           : Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
-                            color: CustomTheme.lightTheme.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4.0)),
+                              color: CustomTheme.lightTheme.primaryColor,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -107,25 +106,30 @@ class _SavedQuotesState extends State<SavedQuotes> {
                                       child: Text('${index + 1}'),
                                       radius: 15,
                                     ),
-                                    title:
-                                        Text(snapshot.data.savedquotes[index], style: TextStyle(fontSize: 24),),
+                                    title: Text(
+                                      snapshot.data[index],
+                                      style: TextStyle(fontSize: 24),
+                                    ),
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(primary: CustomTheme.lightTheme.buttonColor),
-                                        label: Text('分享金句'),
+                                          style: ElevatedButton.styleFrom(
+                                              primary: CustomTheme
+                                                  .lightTheme.buttonColor),
+                                          label: Text('分享金句'),
                                           icon: Icon(Icons.share),
                                           onPressed: () {
                                             setState(() {
-                                              Share.share(snapshot
-                                                  .data.savedquotes[index]);
+                                              Share.share(snapshot.data[index]);
                                             });
                                           }),
-                                          SizedBox(width:15.0),
+                                      SizedBox(width: 15.0),
                                       ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(primary: Colors.red.withOpacity(0.5)),
+                                        style: ElevatedButton.styleFrom(
+                                            primary:
+                                                Colors.red.withOpacity(0.5)),
                                         label: Text('刪除'),
                                         icon: Icon(Icons.delete),
                                         onPressed: () {
@@ -157,11 +161,9 @@ class _SavedQuotesState extends State<SavedQuotes> {
                                                     ),
                                                     onPressed: () {
                                                       setState(() {
-                                                        snapshot
-                                                            .data.savedquotes
+                                                        snapshot.data
                                                             .removeAt(index);
-                                                        snapshot.data.quotesid
-                                                            .removeAt(index);
+
                                                         _preference.saveQuotes(
                                                             snapshot.data);
                                                       });

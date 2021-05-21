@@ -9,6 +9,7 @@ class CustomTheme{
       buttonColor: Color.fromRGBO(143, 214, 225, 1),
       backgroundColor: Colors.white,
       bottomAppBarColor: Color.fromRGBO(255, 170, 167, 1),
+      accentColor: Color.fromRGBO(244, 204, 164, 1)
     );
   }
 }

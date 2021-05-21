@@ -34,16 +34,16 @@ class NotificationService {
 
   Future selectNotification(String payload) async {}
 
-  void scheduledNotification(String message) async {
+  void scheduledNotification() async {
     Random random = Random();
     DateTime now = DateTime.now();
-    DateTime schedule = new DateTime(now.year, now.month, now.day, now.hour + random.nextInt(24), now.minute, now.second, now.millisecond, now.microsecond);
+    DateTime schedule = new DateTime(now.year, now.month, now.day, now.hour + random.nextInt(24), now.minute, now.second , now.millisecond, now.microsecond);
     Duration difference = schedule.difference(now);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
-        '每日金句',
-        message,
+        '人生格言',
+        '立即點擊查看本日金句',
         tz.TZDateTime.now(tz.local).add(difference),
         const NotificationDetails(
             android: AndroidNotificationDetails(
@@ -54,17 +54,4 @@ class NotificationService {
         UILocalNotificationDateInterpretation.absoluteTime, androidAllowWhileIdle: true);
   }
 
-  void showNotification() async {
-    await flutterLocalNotificationsPlugin.show(
-        1,
-        '每日金句',
-        '祝你身體健康',
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
-                channelId: '123',
-                channelName: '每日金句',
-                channelDescription: 'What',
-                importance: Importance.high,
-                priority: Priority.high)));
-  }
 }

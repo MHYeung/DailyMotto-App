@@ -28,14 +28,16 @@ class Home extends StatelessWidget {
         centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.popAndPushNamed(context, '/base');
-                }),
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/base');
+            }),
         actions: [
-          IconButton(icon: Icon(Icons.favorite), onPressed: (){
-            Navigator.pushNamed(context, '/favorite');
-          })
+          IconButton(
+              icon: Icon(Icons.favorite),
+              onPressed: () {
+                Navigator.pushNamed(context, '/favorite');
+              })
         ],
       ),
       body: Body(),
@@ -102,15 +104,17 @@ class _BodyState extends State<Body> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   quote = snapshot.data[context.watch<Counter>().count];
-                  return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      height: MediaQuery.of(context).size.height * 0.7,
-                      child: Center(
-                          child: Text(
-                        snapshot.data[context.watch<Counter>().count],
-                        maxLines: 8,
-                        style: TextStyle(fontSize: 30),
-                      )));
+                  return SingleChildScrollView(
+                    child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.0),
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        child: Center(
+                            child: Text(
+                          snapshot.data[context.watch<Counter>().count],
+                          maxLines: 8,
+                          style: TextStyle(fontSize: 30),
+                        ))),
+                  );
                 } else if (snapshot.hasError) {
                   return Text("${snapshot.error}");
                 }
@@ -127,14 +131,21 @@ class _BodyState extends State<Body> {
                 func: () {
                   context.read<Counter>().decrement();
                   _pressCount++;
-                  if (_pressCount % 7 == 0) {
+                  if (_pressCount % 9 == 0) {
                     _interstitialAd.show();
                     _interstitialAd.dispose();
                     _interstitialAd.load();
                   }
                 },
                 title: '上一句'),
-            CustomButton(func: () => Share.share(quote), title: '分享'),
+            CustomButton(
+                func: () {                 
+                  _interstitialAd.show();
+                  _interstitialAd.dispose();
+                  _interstitialAd.load();
+                  Future.delayed(Duration(seconds: 5),() => Share.share(quote));
+                },
+                title: '分享'),
             CustomButton(
                 func: () {
                   if (_quoteList.contains(quote) == true) {
@@ -159,7 +170,7 @@ class _BodyState extends State<Body> {
                 func: () {
                   context.read<Counter>().increment();
                   _pressCount++;
-                  if (_pressCount % 7 == 0) {
+                  if (_pressCount % 9 == 0) {
                     _interstitialAd.show();
                     _interstitialAd.dispose();
                     _interstitialAd.load();
@@ -197,9 +208,8 @@ class CustomButton extends StatelessWidget {
       onPressed: func,
       child: Text(
         title,
-        style: TextStyle(fontSize: 24),
+        style: TextStyle(fontSize: 20),
       ),
     );
   }
 }
-
